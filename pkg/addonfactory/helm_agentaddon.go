@@ -45,24 +45,28 @@ type helmDefaultValues struct {
 }
 
 type HelmAgentAddon struct {
-	decoder               runtime.Decoder
-	chart                 *chart.Chart
-	getValuesFuncs        []GetValuesFunc
-	agentAddonOptions     agent.AgentAddonOptions
-	trimCRDDescription    bool
-	hostingCluster        *clusterv1.ManagedCluster
-	agentInstallNamespace func(addon *addonapiv1alpha1.ManagedClusterAddOn) string
+	decoder                     runtime.Decoder
+	chart                       *chart.Chart
+	getValuesFuncs              []GetValuesFunc
+	agentAddonOptions           agent.AgentAddonOptions
+	trimCRDDescription          bool
+	hostingCluster              *clusterv1.ManagedCluster
+	agentInstallNamespace       func(addon *addonapiv1alpha1.ManagedClusterAddOn) string
+	createAgentInstallNamespace bool
+	helmEngineStrict            bool
 }
 
 func newHelmAgentAddon(factory *AgentAddonFactory, chart *chart.Chart) *HelmAgentAddon {
 	return &HelmAgentAddon{
-		decoder:               serializer.NewCodecFactory(factory.scheme).UniversalDeserializer(),
-		chart:                 chart,
-		getValuesFuncs:        factory.getValuesFuncs,
-		agentAddonOptions:     factory.agentAddonOptions,
-		trimCRDDescription:    factory.trimCRDDescription,
-		hostingCluster:        factory.hostingCluster,
-		agentInstallNamespace: factory.agentInstallNamespace,
+		decoder:                     serializer.NewCodecFactory(factory.scheme).UniversalDeserializer(),
+		chart:                       chart,
+		getValuesFuncs:              factory.getValuesFuncs,
+		agentAddonOptions:           factory.agentAddonOptions,
+		trimCRDDescription:          factory.trimCRDDescription,
+		hostingCluster:              factory.hostingCluster,
+		agentInstallNamespace:       factory.agentInstallNamespace,
+		createAgentInstallNamespace: factory.createAgentInstallNamespace,
+		helmEngineStrict:            factory.helmEngineStrict,
 	}
 }
 
@@ -104,7 +108,7 @@ func (a *HelmAgentAddon) renderManifests(
 	}
 
 	helmEngine := engine.Engine{
-		Strict:   true,
+		Strict:   a.helmEngineStrict,
 		LintMode: false,
 	}
 
@@ -170,6 +174,13 @@ func (a *HelmAgentAddon) renderManifests(
 			}
 		}
 
+		if agentInstallNamespace != "" && a.createAgentInstallNamespace {
+			var ns unstructured.Unstructured
+			ns.SetAPIVersion("v1")
+			ns.SetKind("Namespace")
+			ns.SetName(agentInstallNamespace)
+			objects = append(objects, &ns)
+		}
 	}
 
 	if a.trimCRDDescription {
