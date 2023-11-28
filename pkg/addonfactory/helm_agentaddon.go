@@ -160,14 +160,11 @@ func (a *HelmAgentAddon) renderManifests(
 					if err != nil {
 						return nil, err
 					}
-					_, found, err := unstructured.NestedString(content, "metadata", "namespace")
-					if err == nil && !found {
-						err := unstructured.SetNestedField(content, agentInstallNamespace, "metadata", "namespace")
-						if err != nil {
-							return nil, err
-						}
-						objects = append(objects, &unstructured.Unstructured{Object: content})
+					err = unstructured.SetNestedField(content, agentInstallNamespace, "metadata", "namespace")
+					if err != nil {
+						return nil, err
 					}
+					objects = append(objects, &unstructured.Unstructured{Object: content})
 				} else {
 					objects = append(objects, object)
 				}
