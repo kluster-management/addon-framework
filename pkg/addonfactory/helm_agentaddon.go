@@ -155,19 +155,19 @@ func (a *HelmAgentAddon) renderManifests(
 					return nil, err
 				}
 
-				if agentInstallNamespace != "" {
-					content, err := runtime.DefaultUnstructuredConverter.ToUnstructured(object)
-					if err != nil {
-						return nil, err
-					}
-					err = unstructured.SetNestedField(content, agentInstallNamespace, "metadata", "namespace")
-					if err != nil {
-						return nil, err
-					}
-					objects = append(objects, &unstructured.Unstructured{Object: content})
-				} else {
-					objects = append(objects, object)
-				}
+				//if agentInstallNamespace != "" {
+				//	content, err := runtime.DefaultUnstructuredConverter.ToUnstructured(object)
+				//	if err != nil {
+				//		return nil, err
+				//	}
+				//	err = unstructured.SetNestedField(content, agentInstallNamespace, "metadata", "namespace")
+				//	if err != nil {
+				//		return nil, err
+				//	}
+				//	objects = append(objects, &unstructured.Unstructured{Object: content})
+				//} else {
+				objects = append(objects, object)
+				//}
 			}
 		}
 
