@@ -195,7 +195,7 @@ func UnionCSRApprover(approvers ...agent.CSRApproveFunc) agent.CSRApproveFunc {
 
 // IsCSRSupported checks whether the cluster supports v1 or v1beta1 csr api.
 func IsCSRSupported(nativeClient kubernetes.Interface) (bool, bool, error) {
-	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(nativeClient.Discovery()))
+	mapper := restmapper.NewDeferredDiscoveryRESTMapper(memory.NewMemCacheClient(nativeClient.Discovery().WithLegacy()))
 	mappings, err := mapper.RESTMappings(schema.GroupKind{
 		Group: certificatesv1.GroupName,
 		Kind:  "CertificateSigningRequest",
